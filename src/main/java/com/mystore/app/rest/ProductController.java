@@ -18,15 +18,15 @@ public class ProductController {
     @Autowired
     private ProductService productService;
 
-    @PostMapping("")
+    @PostMapping()
     public ResponseEntity<Object> addProduct(@RequestBody @Valid Product product) {
         Product p = productService.addProduct(product);
         return new ResponseEntity<>(p, HttpStatus.CREATED);
     }
 
-    @GetMapping("")
-    public List<Product> getAllProducts() {
-        return productService.getAllProducts();
+    @GetMapping
+    public Page<Product> getAllProducts(@RequestParam("page")  int page, @RequestParam("size") int size,@RequestParam(value = "sortBy")  String sortBy, @RequestParam(value = "sortDir") String sortDir) {
+        return productService.getAllProducts(page,size,sortBy,sortDir);
     }
 
 
@@ -58,14 +58,38 @@ public class ProductController {
 
     // TODO: API to search products by name
 
-
+    @GetMapping("/search")
+    public ResponseEntity<List<Product>> serachProductByName(@RequestParam("name") String name) {
+        List<Product> productList = productService.searchProductByName(name);
+        if(productList.isEmpty())
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        return ResponseEntity.ok(productList);
+    }
     // TODO: API to filter products by category
 
-
+    @GetMapping("/filter/category")
+    public ResponseEntity<List<Product>> getProductListByCategoryName(@RequestParam("category") String category) {
+        List<Product> productList = productService.getProductListByCategoryName(category);
+        if(productList.isEmpty())
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        return ResponseEntity.ok(productList);
+    }
     // TODO: API to filter products by price range
-
+    @GetMapping("/filter/price")
+    public ResponseEntity<List<Product>> getProductListWithInPriceRange(@Valid @RequestParam("minPrice") Double minPrice,@Valid @RequestParam("maxPrice") Double maxPrice) {
+        List<Product> productList = productService.getProductListWithInPriceRange(minPrice,maxPrice);
+        if(productList.isEmpty())
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        return ResponseEntity.ok(productList);
+    }
 
     // TODO: API to filter products by stock quantity range
 
-
+    @GetMapping("/filter/stock")
+    public ResponseEntity<List<Product>> getProductListByStock(@Valid@RequestParam("minStock") Integer minStock,@Valid@RequestParam("maxStock") Integer maxStock) {
+        List<Product> productList = productService.getProductListByStock(minStock,maxStock);
+        if(productList.isEmpty())
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        return ResponseEntity.ok(productList);
+    }
 }
